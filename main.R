@@ -17,10 +17,11 @@ library("mxnet");
 library("imager");
 library("data.table");
 library("nnet"); #just used for class.ind
+require(mlbench)
 
 
 #prep id's targets and data
-driver_details = read.csv("../input/driver_imgs_list.csv");
+driver_details<-read.csv("imgs/driver_imgs_list.csv");
 
 
 # helper function
@@ -74,10 +75,11 @@ num_channels = 1;
 load.and.prep.img = function(tf){
   im = load.image(tf);
   #convert to gray scale
-  if(!use_rgb){
-    im = 0.2989 * channel(im,1) + 0.5870 * channel(im,2) + 0.1140 * channel(im,3) 
-  }
-  im = resize(im,img_width,img_height);
+  #if(!use_rgb){
+  #  im = 0.2989 * channel(im,1) + 0.5870 * channel(im,2) + 0.1140 * channel(im,3) 
+  #}
+  im=grayscale(im)
+  #im = resize(im,img_width,img_height);
   return(im);
 }
 
@@ -85,18 +87,18 @@ load.and.prep.img = function(tf){
 # max files to load
 # set this to large number like 10000
 # when doing full train
-max_train_images_to_load = 500;
+max_train_images_to_load = 100;
 
 # loading images in parallel
 # set cpu cores to what you have at disposal
 # and watch for RAM, 4 cores should do just fine
 # with 8 gb of RAM
-cpu.cores = 4;
+cpu.cores = 6;
 cl <- makeCluster(cpu.cores); 
 registerDoParallel(cl);
 train_img_matrix = 
   foreach(cls = 0:9, .packages=c('imager'), .combine=rbind, .multicombine=T) %dopar% {
-    train_files = list.files(paste0("../input/train/c", cls, "/"),"*.*",full.names = T);
+    train_files = list.files(paste0("imgs/train/c", cls, "/"),"*.*",full.names = T);
     train_files = train_files[1:max_train_images_to_load];
     targets = c();    
     m = data.frame(matrix(0,nrow=length(train_files),ncol=img_width*img_height*num_channels));
@@ -117,11 +119,11 @@ stopCluster(cl);
 test_img_matrix = NULL;
 test_id = NULL;
 #enable it for submission
-if(FALSE){
+if(TRUE){
   # test part
   cl <- makeCluster(cpu.cores); 
   registerDoParallel(cl);
-  test_files = data.frame("file"=list.files("../input/test/","*.*",full.names = T),stringsAsFactors = FALSE);
+  test_files = data.frame("file"=list.files("imgs/test/","*.*",full.names = T),stringsAsFactors = FALSE);
   test_files$rid = 1:nrow(test_files);
   test_files$rid = test_files$rid%%7;
   test_img_matrix = 
@@ -147,7 +149,7 @@ if(FALSE){
 }
 
 #prep id's targets and data
-driver_details = read.csv("../input/driver_imgs_list.csv");
+driver_details = read.csv("imgs/driver_imgs_list.csv");
 imgm = train_img_matrix;
 imgm = imgm[order(sample(nrow(imgm))),];
 y = imgm$target;
@@ -214,7 +216,7 @@ for(foldId in 1:nfold){
   mx.set.seed(0);
   
   #switch here to gpu use: device = mx.gpu();
-  device = mx.cpu();
+  device = mx.gpu();
   model <- mx.model.FeedForward.create(
     X                  = g_train,
     y                  = y_train,
