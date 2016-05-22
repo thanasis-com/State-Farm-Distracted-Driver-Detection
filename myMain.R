@@ -40,14 +40,14 @@ output = mx.symbol.SoftmaxOutput(data=fc2)
 
 #begin training
 
-device = mx.gpu()
-mx.set.seed(0)
+#device = mx.gpu()
+#mx.set.seed(0)
 
-model<-mx.model.FeedForward.create(mynet, X=train.array, y=train.y,
-                                  ctx=device, num.round=1, array.batch.size=100,
-                                  learning.rate=0.05, momentum=0.9, wd=0.00001,
-                                  eval.metric=mx.metric.accuracy,
-                                  epoch.end.callback=mx.callback.log.train.metric(100))
+# model<-mx.model.FeedForward.create(mynet, X=train.array, y=train.y,
+#                                   ctx=device, num.round=1, array.batch.size=100,
+#                                   learning.rate=0.05, momentum=0.9, wd=0.00001,
+#                                   eval.metric=mx.metric.accuracy,
+#                                   epoch.end.callback=mx.callback.log.train.metric(100))
 
 
 

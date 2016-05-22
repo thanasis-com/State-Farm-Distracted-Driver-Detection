@@ -58,7 +58,7 @@ loadTestImgs<-function(numOfCores, grey, resize, width, height, channels=1)
   
   cl<-makeCluster(numOfCores)
   registerDoParallel(cl)
-  trainImages<-
+  testImages<-
     foreach(cls = 0:9, .packages=c('imager'), .export=c("loadImg"), .combine=rbind, .multicombine=T) %dopar% {
       train_files<-list.files(paste0("imgs/test/c", cls, "/"),"*.*",full.names = T)
       m<-data.frame(matrix(0,nrow=length(train_files),ncol=width*height*channels))
