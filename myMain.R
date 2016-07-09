@@ -12,7 +12,7 @@ driver_details = read.csv("imgs/driver_imgs_list.csv")
 train<-loadTrainImgBatch(numOfCores=6, numOfImages=1000, grey=TRUE, resize=TRUE, width=106, height=80, channels=1)
 
 #load all the training images
-train<-loadTestImgs(numOfCores=6, grey=TRUE, resize=TRUE, width=106, height=80, channels=1)
+test<-loadTestImgs(numOfCores=6, grey=TRUE, resize=TRUE, width=106, height=80, channels=1)
 
 train.x<-train[,3:ncol(train)]
 train.y<-train[,2]

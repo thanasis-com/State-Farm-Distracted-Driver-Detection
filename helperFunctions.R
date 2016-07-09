@@ -58,17 +58,20 @@ loadTestImgs<-function(numOfCores, grey, resize, width, height, channels=1)
   
   cl<-makeCluster(numOfCores)
   registerDoParallel(cl)
+  test_files<-data.frame("file"=list.files("imgs/test/","*.*",full.names = T),stringsAsFactors = FALSE)
+  test_files$rid<-1:nrow(test_files)
+  test_files$rid<-test_files$rid%%7
   testImages<-
-    foreach(cls = 0:9, .packages=c('imager'), .export=c("loadImg"), .combine=rbind, .multicombine=T) %dopar% {
-      train_files<-list.files(paste0("imgs/test/c", cls, "/"),"*.*",full.names = T)
-      m<-data.frame(matrix(0,nrow=length(train_files),ncol=width*height*channels))
+    foreach(cls = 0:max(test_files$rid), .packages=c('imager'), .export=c("loadImg"), .combine=rbind, .multicombine=T) %dopar% {
+      t_files = test_files[test_files$rid==cls,"file"]
+      m<-data.frame(matrix(0,nrow=length(test_files),ncol=width*height*channels))
       mi<-1
-      for(tf in train_files){
+      for(tf in t_files){
         m[mi,]<-as.numeric(loadImg(tf, grey, resize, width, height))
         mi<-mi + 1
       }             
-      df = data.frame(m,stringsAsFactors = FALSE)
-      df = cbind("file"=train_files,df)
+      df<-data.frame(m,stringsAsFactors = FALSE)
+      df<-cbind("file"=t_files,df)
       return(df)
     }
   stopCluster(cl)
